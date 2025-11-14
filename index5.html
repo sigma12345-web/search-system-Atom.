@@ -1,0 +1,3123 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Атом - Расширенный поиск в интернете</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #00dbde;
+            --secondary-color: #fc00ff;
+            --bg-color: #0f0f23;
+            --bg-secondary: #1a1a2e;
+            --bg-tertiary: #16213e;
+            --text-color: #ffffff;
+            --text-secondary: #a0a0c0;
+            --text-muted: #6c757d;
+            --success-color: #00ff88;
+            --error-color: #ff4444;
+            --warning-color: #ffcc00;
+            --card-bg: rgba(255, 255, 255, 0.08);
+            --card-border: rgba(255, 255, 255, 0.12);
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, var(--bg-color) 0%, var(--bg-secondary) 50%, var(--bg-tertiary) 100%);
+            color: var(--text-color);
+            min-height: 100vh;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            position: relative;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .logo-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            box-shadow: 0 4px 15px rgba(0, 219, 222, 0.4);
+        }
+        
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+        
+        .subtitle {
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .stats-bar {
+            display: flex;
+            justify-content: space-between;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 12px 20px;
+            margin-bottom: 25px;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            border: 1px solid var(--card-border);
+        }
+        
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .search-method-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .search-method {
+            padding: 10px 18px;
+            border: 1px solid var(--card-border);
+            border-radius: 25px;
+            background: var(--card-bg);
+            color: var(--text-color);
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            backdrop-filter: blur(10px);
+        }
+
+        .search-method.active {
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            border-color: transparent;
+            box-shadow: 0 4px 15px rgba(0, 219, 222, 0.3);
+        }
+
+        .search-method:hover:not(.active) {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .search-method:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .chat-container {
+            background: var(--card-bg);
+            border-radius: 20px;
+            overflow: hidden;
+            height: 550px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--card-border);
+            backdrop-filter: blur(10px);
+        }
+        
+        .chat-header {
+            padding: 15px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-bottom: 1px solid var(--card-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .chat-title {
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .status-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--success-color);
+            animation: pulse 2s infinite;
+        }
+        
+        .chat-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .chat-action-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 1rem;
+            transition: var(--transition);
+            padding: 5px;
+            border-radius: 5px;
+        }
+        
+        .chat-action-btn:hover {
+            color: var(--text-color);
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .message {
+            padding: 15px 18px;
+            border-radius: 18px;
+            max-width: 85%;
+            animation: fadeIn 0.4s ease;
+            line-height: 1.5;
+            position: relative;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .user-message {
+            background: linear-gradient(135deg, var(--primary-color), #0077ff);
+            margin-left: auto;
+            border-bottom-right-radius: 5px;
+            color: white;
+        }
+        
+        .assistant-message {
+            background: var(--card-bg);
+            margin-right: auto;
+            border-bottom-left-radius: 5px;
+            border: 1px solid var(--card-border);
+        }
+        
+        .message-time {
+            font-size: 0.7rem;
+            opacity: 0.7;
+            margin-top: 5px;
+            text-align: right;
+        }
+        
+        .input-container {
+            display: flex;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-top: 1px solid var(--card-border);
+            gap: 12px;
+        }
+        
+        .chat-input {
+            flex: 1;
+            padding: 14px 18px;
+            border: 2px solid var(--card-border);
+            border-radius: 25px;
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-color);
+            font-size: 1rem;
+            transition: var(--transition);
+            backdrop-filter: blur(5px);
+        }
+        
+        .chat-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(0, 219, 222, 0.2);
+        }
+        
+        .send-btn {
+            padding: 14px 25px;
+            border: none;
+            border-radius: 25px;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            cursor: pointer;
+            font-weight: 600;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 15px rgba(0, 219, 222, 0.3);
+        }
+
+        .send-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 219, 222, 0.4);
+        }
+
+        .send-btn:active {
+            transform: translateY(0);
+        }
+
+        .send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .typing-indicator {
+            display: none;
+            margin-right: auto;
+            background: var(--card-bg);
+            padding: 12px 18px;
+            border-radius: 18px;
+            border-bottom-left-radius: 5px;
+            max-width: 100px;
+            border: 1px solid var(--card-border);
+        }
+        
+        .typing-indicator.active {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .typing-text {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+        
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--text-secondary);
+            animation: typing 1.4s infinite ease-in-out;
+        }
+        
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        .search-results {
+            margin-top: 15px;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            font-size: 0.9em;
+            border: 1px solid var(--card-border);
+        }
+
+        .source-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: rgba(0, 219, 222, 0.2);
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.75em;
+            margin-right: 8px;
+            margin-bottom: 8px;
+            border: 1px solid rgba(0, 219, 222, 0.3);
+        }
+
+        .wiki-link {
+            color: var(--primary-color);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            margin: 8px 0;
+            transition: var(--transition);
+        }
+
+        .wiki-link:hover {
+            color: var(--secondary-color);
+            text-decoration: underline;
+        }
+
+        .error-message {
+            background: rgba(255, 68, 68, 0.1);
+            border: 1px solid var(--error-color);
+            color: var(--error-color);
+            padding: 10px 14px;
+            border-radius: 10px;
+            margin: 8px 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .success-message {
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid var(--success-color);
+            color: var(--success-color);
+            padding: 10px 14px;
+            border-radius: 10px;
+            margin: 8px 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .suggestions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .suggestion {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 8px 16px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .suggestion:hover {
+            background: rgba(255, 255, 255, 0.12);
+            transform: translateY(-2px);
+        }
+        
+        .quick-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            justify-content: center;
+        }
+        
+        .quick-action {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 10px 15px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .quick-action:hover {
+            background: rgba(255, 255, 255, 0.12);
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+        
+        /* Админ панель */
+        .admin-panel {
+            position: fixed;
+            top: 0;
+            right: -400px;
+            width: 400px;
+            height: 100vh;
+            background: var(--bg-secondary);
+            border-left: 1px solid var(--card-border);
+            transition: var(--transition);
+            z-index: 1000;
+            overflow-y: auto;
+            box-shadow: -5px 0 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .admin-panel.open {
+            right: 0;
+        }
+        
+        .admin-header {
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-bottom: 1px solid var(--card-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .admin-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        .admin-close {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .admin-close:hover {
+            color: var(--text-color);
+        }
+        
+        .admin-content {
+            padding: 20px;
+        }
+        
+        .admin-section {
+            margin-bottom: 25px;
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 15px;
+            border: 1px solid var(--card-border);
+        }
+        
+        .admin-section-title {
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--card-border);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .admin-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .admin-control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .admin-label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+        
+        .admin-input, .admin-select, .admin-textarea {
+            padding: 10px 12px;
+            border: 1px solid var(--card-border);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-color);
+            font-size: 0.9rem;
+            transition: var(--transition);
+        }
+        
+        .admin-input:focus, .admin-select:focus, .admin-textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(0, 219, 222, 0.2);
+        }
+        
+        .admin-textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        .admin-button {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 8px;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            cursor: pointer;
+            font-weight: 600;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .admin-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0, 219, 222, 0.3);
+        }
+        
+        .admin-button.secondary {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .admin-button.danger {
+            background: var(--error-color);
+        }
+        
+        .admin-button-group {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .admin-button-group .admin-button {
+            flex: 1;
+        }
+        
+        .admin-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+        
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(255, 255, 255, 0.2);
+            transition: var(--transition);
+            border-radius: 24px;
+        }
+        
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: var(--transition);
+            border-radius: 50%;
+        }
+        
+        input:checked + .toggle-slider {
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+        }
+        
+        input:checked + .toggle-slider:before {
+            transform: translateX(26px);
+        }
+        
+        .admin-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        
+        .admin-stat-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
+            border: 1px solid var(--card-border);
+        }
+        
+        .admin-stat-value {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .admin-stat-label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+        
+        .admin-tabs {
+            display: flex;
+            border-bottom: 1px solid var(--card-border);
+            margin-bottom: 15px;
+        }
+        
+        .admin-tab {
+            padding: 10px 15px;
+            cursor: pointer;
+            transition: var(--transition);
+            border-bottom: 2px solid transparent;
+        }
+        
+        .admin-tab.active {
+            border-bottom: 2px solid var(--primary-color);
+            color: var(--primary-color);
+        }
+        
+        .admin-tab-content {
+            display: none;
+        }
+        
+        .admin-tab-content.active {
+            display: block;
+        }
+        
+        .admin-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .admin-list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            border: 1px solid var(--card-border);
+        }
+        
+        .admin-list-item-content {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .admin-list-item-title {
+            font-weight: 600;
+        }
+        
+        .admin-list-item-subtitle {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+        
+        .admin-list-item-actions {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .admin-list-item-action {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: var(--transition);
+            padding: 5px;
+            border-radius: 5px;
+        }
+        
+        .admin-list-item-action:hover {
+            color: var(--text-color);
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .admin-open-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 1.2rem;
+            box-shadow: 0 4px 15px rgba(0, 219, 222, 0.4);
+            transition: var(--transition);
+            z-index: 999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .admin-open-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0, 219, 222, 0.6);
+        }
+        
+        .admin-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            opacity: 0;
+            visibility: hidden;
+            transition: var(--transition);
+        }
+        
+        .admin-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        /* Форма входа в админ-панель */
+        .admin-login {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1001;
+            opacity: 0;
+            visibility: hidden;
+            transition: var(--transition);
+        }
+        
+        .admin-login.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .login-form {
+            background: var(--bg-secondary);
+            border-radius: 20px;
+            padding: 30px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--card-border);
+            text-align: center;
+        }
+        
+        .login-title {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        .login-subtitle {
+            color: var(--text-secondary);
+            margin-bottom: 25px;
+        }
+        
+        .login-input-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        
+        .login-label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+        }
+        
+        .login-input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid var(--card-border);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-color);
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+        
+        .login-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(0, 219, 222, 0.2);
+        }
+        
+        .login-button {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: var(--transition);
+            margin-top: 10px;
+        }
+        
+        .login-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0, 219, 222, 0.3);
+        }
+        
+        .login-error {
+            color: var(--error-color);
+            margin-top: 15px;
+            display: none;
+        }
+        
+        .login-error.show {
+            display: block;
+        }
+        
+        .password-hint {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 15px;
+            text-align: center;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes typing {
+            0%, 60%, 100% {
+                transform: translateY(0);
+                opacity: 0.6;
+            }
+            30% {
+                transform: translateY(-5px);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(0, 255, 136, 0.7);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(0, 255, 136, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(0, 255, 136, 0);
+            }
+        }
+        
+        /* Адаптивность */
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 10px;
+            }
+            
+            h1 {
+                font-size: 2.2rem;
+            }
+            
+            .search-method-selector {
+                gap: 8px;
+            }
+            
+            .search-method {
+                padding: 8px 14px;
+                font-size: 0.8em;
+            }
+            
+            .chat-container {
+                height: 500px;
+            }
+            
+            .message {
+                max-width: 90%;
+            }
+            
+            .input-container {
+                padding: 15px;
+            }
+            
+            .stats-bar {
+                flex-direction: column;
+                gap: 10px;
+                align-items: center;
+            }
+            
+            .admin-panel {
+                width: 100%;
+                right: -100%;
+            }
+        }
+        
+        /* Специальные стили для контента */
+        .message-content h3 {
+            margin-bottom: 8px;
+            color: var(--primary-color);
+        }
+        
+        .message-content ul, .message-content ol {
+            padding-left: 20px;
+            margin: 10px 0;
+        }
+        
+        .message-content li {
+            margin-bottom: 5px;
+        }
+        
+        .message-content blockquote {
+            border-left: 3px solid var(--primary-color);
+            padding-left: 15px;
+            margin: 10px 0;
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+        
+        .message-content code {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 0.9em;
+        }
+        
+        .message-content pre {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 12px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+        
+        .message-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0;
+        }
+        
+        .message-content th, .message-content td {
+            padding: 8px 12px;
+            border: 1px solid var(--card-border);
+            text-align: left;
+        }
+        
+        .message-content th {
+            background: rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <div class="logo-icon">
+                    <i class="fas fa-atom"></i>
+                </div>
+                <h1>Атом</h1>
+            </div>
+            <p class="subtitle">Расширенный поисковый ассистент с доступом к актуальной информации из различных источников</p>
+            
+            <div class="stats-bar">
+                <div class="stat-item">
+                    <i class="fas fa-bolt"></i>
+                    <span>Режим: Высокая скорость</span>
+                </div>
+                <div class="stat-item">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>Защита конфиденциальности</span>
+                </div>
+                <div class="stat-item">
+                    <i class="fas fa-globe"></i>
+                    <span>Многоязычные источники</span>
+                </div>
+            </div>
+        </header>
+        
+        <div class="search-method-selector">
+            <div class="search-method active" data-method="wikipedia">
+                <i class="fab fa-wikipedia-w"></i>
+                <span>Wikipedia</span>
+            </div>
+            <div class="search-method" data-method="duckduckgo">
+                <i class="fas fa-search"></i>
+                <span>DuckDuckGo</span>
+            </div>
+            <div class="search-method" data-method="newsapi">
+                <i class="far fa-newspaper"></i>
+                <span>Новости</span>
+            </div>
+            <div class="search-method" data-method="google">
+                <i class="fab fa-google"></i>
+                <span>Google</span>
+            </div>
+            <div class="search-method" data-method="academic">
+                <i class="fas fa-graduation-cap"></i>
+                <span>Академия</span>
+            </div>
+            <!-- Добавляем новые методы -->
+            <div class="search-method" data-method="youtube">
+                <i class="fab fa-youtube"></i>
+                <span>YouTube</span>
+            </div>
+            <div class="search-method" data-method="reddit">
+                <i class="fab fa-reddit"></i>
+                <span>Reddit</span>
+            </div>
+            <div class="search-method" data-method="github">
+                <i class="fab fa-github"></i>
+                <span>GitHub</span>
+            </div>
+            <div class="search-method" data-method="stackoverflow">
+                <i class="fab fa-stack-overflow"></i>
+                <span>StackOverflow</span>
+            </div>
+        </div>
+        
+        <div class="chat-container">
+            <div class="chat-header">
+                <div class="chat-title">
+                    <div class="status-indicator"></div>
+                    <span>Атом готов к поиску</span>
+                </div>
+                <div class="chat-actions">
+                    <button class="chat-action-btn" id="clearChat" title="Очистить чат">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                    <button class="chat-action-btn" id="exportChat" title="Экспортировать чат">
+                        <i class="fas fa-download"></i>
+                    </button>
+                    <button class="chat-action-btn" id="settingsBtn" title="Настройки">
+                        <i class="fas fa-cog"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="chat-messages" id="conversation">
+                <div class="message assistant-message">
+                    <div class="message-content">
+                        <p>Привет! Я <strong>Атом</strong> - ваш расширенный поисковый ассистент с доступом к актуальной информации из интернета.</p>
+                        <p>Выберите метод поиска выше и задавайте вопросы! Я могу помочь с:</p>
+                        <ul>
+                            <li>Поиском энциклопедической информации</li>
+                            <li>Актуальными новостями</li>
+                            <li>Научными данными</li>
+                            <li>Видео материалами</li>
+                            <li>Обсуждениями на форумах</li>
+                            <li>Поиском кода и репозиториев</li>
+                            <li>И многим другим!</li>
+                        </ul>
+                    </div>
+                    <div class="message-time">Только что</div>
+                </div>
+            </div>
+            
+            <div class="typing-indicator" id="typingIndicator">
+                <div class="typing-text">Поиск...</div>
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+            </div>
+            
+            <div class="input-container">
+                <input type="text" class="chat-input" id="chatInput" placeholder="Задайте вопрос для поиска в интернете...">
+                <button class="send-btn" id="sendBtn">
+                    <i class="fas fa-paper-plane"></i>
+                    <span>Найти</span>
+                </button>
+            </div>
+        </div>
+        
+        <div class="suggestions">
+            <div class="suggestion" data-query="Искусственный интеллект">Искусственный интеллект</div>
+            <div class="suggestion" data-query="Квантовая физика">Квантовая физика</div>
+            <div class="suggestion" data-query="Последние новости технологии">Технологии</div>
+            <div class="suggestion" data-query="Климатические изменения">Климат</div>
+            <div class="suggestion" data-query="Python программирование">Python</div>
+            <div class="suggestion" data-query="15+27*3">Математика</div>
+        </div>
+        
+        <div class="quick-actions">
+            <div class="quick-action" id="voiceSearch">
+                <i class="fas fa-microphone"></i>
+                <span>Голосовой поиск</span>
+            </div>
+            <div class="quick-action" id="imageSearch">
+                <i class="fas fa-image"></i>
+                <span>Поиск по изображению</span>
+            </div>
+            <div class="quick-action" id="advancedSearch">
+                <i class="fas fa-sliders-h"></i>
+                <span>Расширенный поиск</span>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>Атом Search &copy; 2023 | Расширенный поиск в интернете</p>
+        </div>
+    </div>
+
+    <!-- Форма входа в админ-панель -->
+    <div class="admin-login" id="adminLogin">
+        <div class="login-form">
+            <h2 class="login-title">Панель управления</h2>
+            <p class="login-subtitle">Введите пароль для доступа к админ-панели</p>
+            
+            <div class="login-input-group">
+                <label class="login-label" for="adminPassword">Пароль администратора</label>
+                <input type="password" class="login-input" id="adminPassword" placeholder="Введите пароль">
+            </div>
+            
+            <button class="login-button" id="loginButton">
+                <i class="fas fa-lock"></i>
+                <span>Войти в админ-панель</span>
+            </button>
+            
+            <div class="login-error" id="loginError">
+                <i class="fas fa-exclamation-triangle"></i>
+                <span>Неверный пароль. Попробуйте снова.</span>
+            </div>
+            
+            <div class="password-hint">
+                Подсказка: пароль по умолчанию - "admin123"
+            </div>
+        </div>
+    </div>
+
+    <!-- Админ панель -->
+    <div class="admin-overlay" id="adminOverlay"></div>
+    <button class="admin-open-btn" id="adminOpenBtn">
+        <i class="fas fa-cogs"></i>
+    </button>
+    <div class="admin-panel" id="adminPanel">
+        <div class="admin-header">
+            <div class="admin-title">Панель управления Атом</div>
+            <button class="admin-close" id="adminCloseBtn">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="admin-content">
+            <div class="admin-tabs">
+                <div class="admin-tab active" data-tab="dashboard">Дашборд</div>
+                <div class="admin-tab" data-tab="settings">Настройки</div>
+                <div class="admin-tab" data-tab="users">Пользователи</div>
+                <div class="admin-tab" data-tab="analytics">Аналитика</div>
+            </div>
+            
+            <div class="admin-tab-content active" id="dashboard-tab">
+                <div class="admin-section">
+                    <div class="admin-section-title">
+                        <i class="fas fa-tachometer-alt"></i>
+                        <span>Общая статистика</span>
+                    </div>
+                    <div class="admin-stats">
+                        <div class="admin-stat-card">
+                            <div class="admin-stat-value" id="totalSearches">0</div>
+                            <div class="admin-stat-label">Всего запросов</div>
+                        </div>
+                        <div class="admin-stat-card">
+                            <div class="admin-stat-value" id="activeUsers">0</div>
+                            <div class="admin-stat-label">Активных пользователей</div>
+                        </div>
+                        <div class="admin-stat-card">
+                            <div class="admin-stat-value" id="cacheSize">0</div>
+                            <div class="admin-stat-label">Размер кэша (МБ)</div>
+                        </div>
+                        <div class="admin-stat-card">
+                            <div class="admin-stat-value" id="responseTime">0мс</div>
+                            <div class="admin-stat-label">Среднее время ответа</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="admin-section">
+                    <div class="admin-section-title">
+                        <i class="fas fa-chart-line"></i>
+                        <span>Методы поиска</span>
+                    </div>
+                    <div class="admin-controls">
+                        <div class="admin-control-group">
+                            <div class="admin-label">Статистика использования методов поиска</div>
+                            <div id="searchMethodsStats">
+                                <!-- Статистика будет добавлена динамически -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="admin-section">
+                    <div class="admin-section-title">
+                        <i class="fas fa-server"></i>
+                        <span>Состояние системы</span>
+                    </div>
+                    <div class="admin-controls">
+                        <div class="admin-control-group">
+                            <div class="admin-toggle">
+                                <div class="admin-label">Режим обслуживания</div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="maintenanceMode">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="admin-control-group">
+                            <div class="admin-toggle">
+                                <div class="admin-label">Кэширование результатов</div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="cachingEnabled" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="admin-control-group">
+                            <div class="admin-toggle">
+                                <div class="admin-label">Сбор аналитики</div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="analyticsEnabled" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="admin-tab-content" id="settings-tab">
+                <div class="admin-section">
+                    <div class="admin-section-title">
+                        <i class="fas fa-cog"></i>
+                        <span>Основные настройки</span>
+                    </div>
+                    <div class="admin-controls">
+                        <div class="admin-control-group">
+                            <div class="admin-label">Название системы</div>
+                            <input type="text" class="admin-input" id="systemName" value="Атом">
+                        </div>
+                        <div class="admin-control-group">
+                            <div class="admin-label">Описание системы</div>
+                            <textarea class="admin-textarea" id="systemDescription">Расширенный поисковый ассистент с доступом к актуальной информации из различных источников</textarea>
+                        </div>
+                        <div class="admin-control-group">
+                            <div class="admin-label">Время кэширования (минуты)</div>
+                            <input type="number" class="admin-input" id="cacheTimeout" value="5" min="1" max="60">
+                        </div>
+                        <div class="admin-control-group">
+                            <div class="admin-label">Максимальный размер кэша (МБ)</div>
+                            <input type="number" class="admin-input" id="maxCacheSize" value="100" min="10" max="1000">
+                        </div>
+                        <div class="admin-button-group">
+                            <button class="admin-button" id="saveSettings">
+                                <i class="fas fa-save"></i>
+                                <span>Сохранить настройки</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="admin-section">
+                    <div class="admin-section-title">
+                        <i class="fas fa-search"></i>
+                        <span>Настройки поиска</span>
+                    </div>
+                    <div class="admin-controls">
+                        <div class="admin-control-group">
+                            <div class="admin-label">Методы поиска по умолчанию</div>
+                            <div id="defaultSearchMethods">
+                                <!-- Методы поиска будут добавлены динамически -->
+                            </div>
+                        </div>
+                        <div class="admin-control-group">
+                            <div class="admin-label">Максимальное количество результатов</div>
+                            <input type="number" class="admin-input" id="maxResults" value="5" min="1" max="20">
+                        </div>
+                        <div class="admin-control-group">
+                            <div class="admin-label">Язык по умолчанию</div>
+                            <select class="admin-select" id="defaultLanguage">
+                                <option value="ru">Русский</option>
+                                <option value="en">Английский</option>
+                                <option value="de">Немецкий</option>
+                                <option value="fr">Французский</option>
+                                <option value="es">Испанский</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="admin-section">
+                    <div class="admin-section-title">
+                        <i class="fas fa-shield-alt"></i>
+                        <span>Безопасность</span>
+                    </div>
+                    <div class="admin-controls">
+                        <div class="admin-control-group">
+                            <div class="admin-toggle">
+                                <div class="admin-label">Безопасный поиск</div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="safeSearch" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="admin-control-group">
+                            <div class="admin-toggle">
+                                <div class="admin-label">Защита от спама</div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="spamProtection" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="admin-control-group">
+                            <div class="admin-toggle">
+                                <div class="admin-label">Защита конфиденциальности</div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="privacyProtection" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="admin-control-group">
+                            <div class="admin-label">Лимит запросов в минуту</div>
+                            <input type="number" class="admin-input" id="rateLimit" value="60" min="10" max="1000">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="admin-tab-content" id="users-tab">
+                <div class="admin-section">
+                    <div class="admin-section-title">
+                        <i class="fas fa-users"></i>
+                        <span>Управление пользователями</span>
+                    </div>
+                    <div class="admin-controls">
+                        <div class="admin-control-group">
+                            <div class="admin-label">Поиск пользователей</div>
+                            <input type="text" class="admin-input" id="userSearch" placeholder="Введите имя пользователя или ID">
+                        </div>
+                        <div class="admin-button-group">
+                            <button class="admin-button" id="searchUserBtn">
+                                <i class="fas fa-search"></i>
+                                <span>Найти</span>
+                            </button>
+                            <button class="admin-button secondary" id="addUserBtn">
+                                <i class="fas fa-user-plus"></i>
+                                <span>Добавить</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="admin-section">
+                    <div class="admin-section-title">
+                        <i class="fas fa-history"></i>
+                        <span>История активности</span>
+                    </div>
+                    <div class="admin-controls">
+                        <div class="admin-list" id="userActivityList">
+                            <!-- Активность будет добавлена динамически -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="admin-tab-content" id="analytics-tab">
+                <div class="admin-section">
+                    <div class="admin-section-title">
+                        <i class="fas fa-chart-bar"></i>
+                        <span>Аналитика поиска</span>
+                    </div>
+                    <div class="admin-controls">
+                        <div class="admin-control-group">
+                            <div class="admin-label">Популярные запросы</div>
+                            <div id="popularQueries">
+                                <!-- Популярные запросы будут добавлены динамически -->
+                            </div>
+                        </div>
+                        <div class="admin-control-group">
+                            <div class="admin-label">Статистика по времени суток</div>
+                            <div id="timeStats">
+                                <!-- Статистика по времени будет добавлена динамически -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="admin-section">
+                    <div class="admin-section-title">
+                        <i class="fas fa-download"></i>
+                        <span>Экспорт данных</span>
+                    </div>
+                    <div class="admin-controls">
+                        <div class="admin-control-group">
+                            <div class="admin-label">Выберите данные для экспорта</div>
+                            <select class="admin-select" id="exportDataType">
+                                <option value="search_history">История поиска</option>
+                                <option value="user_activity">Активность пользователей</option>
+                                <option value="system_logs">Системные логи</option>
+                                <option value="analytics_data">Аналитические данные</option>
+                            </select>
+                        </div>
+                        <div class="admin-control-group">
+                            <div class="admin-label">Формат экспорта</div>
+                            <select class="admin-select" id="exportFormat">
+                                <option value="json">JSON</option>
+                                <option value="csv">CSV</option>
+                                <option value="xml">XML</option>
+                            </select>
+                        </div>
+                        <div class="admin-button-group">
+                            <button class="admin-button" id="exportDataBtn">
+                                <i class="fas fa-file-export"></i>
+                                <span>Экспортировать данные</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="admin-section">
+                    <div class="admin-section-title">
+                        <i class="fas fa-trash-alt"></i>
+                        <span>Очистка данных</span>
+                    </div>
+                    <div class="admin-controls">
+                        <div class="admin-control-group">
+                            <div class="admin-label">Выберите данные для очистки</div>
+                            <select class="admin-select" id="clearDataType">
+                                <option value="cache">Кэш поиска</option>
+                                <option value="search_history">История поиска</option>
+                                <option value="user_data">Данные пользователей</option>
+                                <option value="analytics">Аналитические данные</option>
+                            </select>
+                        </div>
+                        <div class="admin-button-group">
+                            <button class="admin-button danger" id="clearDataBtn">
+                                <i class="fas fa-trash"></i>
+                                <span>Очистить данные</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Класс для расширенного поиска
+        class EnhancedInternetSearch {
+            constructor() {
+                this.currentMethod = 'wikipedia';
+                this.searchHistory = [];
+                this.cache = new Map();
+                this.cacheTimeout = 5 * 60 * 1000;
+                
+                // Расширенный список сервисов поиска
+                this.searchServices = {
+                    wikipedia: {
+                        name: "Wikipedia",
+                        icon: "fab fa-wikipedia-w",
+                        searchUrl: "https://ru.wikipedia.org/w/api.php?action=query&list=search&srsearch={query}&format=json&origin=*&srlimit=5",
+                        contentUrl: "https://ru.wikipedia.org/w/api.php?action=query&prop=extracts&exintro=true&explaintext=true&titles={title}&format=json&origin=*"
+                    },
+                    duckduckgo: {
+                        name: "DuckDuckGo",
+                        icon: "fas fa-search",
+                        searchUrl: "https://api.duckduckgo.com/?q={query}&format=json&no_html=1&skip_disambig=1"
+                    },
+                    google: {
+                        name: "Google",
+                        icon: "fab fa-google",
+                        searchUrl: "https://www.googleapis.com/customsearch/v1?key=YOUR_API_KEY&cx=YOUR_SEARCH_ENGINE_ID&q={query}"
+                    },
+                    newsapi: {
+                        name: "NewsAPI",
+                        icon: "far fa-newspaper",
+                        searchUrl: "https://newsapi.org/v2/everything?q={query}&language=ru&sortBy=publishedAt&apiKey=YOUR_API_KEY"
+                    },
+                    academic: {
+                        name: "Академия",
+                        icon: "fas fa-graduation-cap",
+                        searchUrl: "https://api.crossref.org/works?query={query}&rows=5"
+                    },
+                    youtube: {
+                        name: "YouTube",
+                        icon: "fab fa-youtube",
+                        searchUrl: "https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=5&q={query}&key=YOUR_YOUTUBE_API_KEY"
+                    },
+                    reddit: {
+                        name: "Reddit",
+                        icon: "fab fa-reddit",
+                        searchUrl: "https://www.reddit.com/search.json?q={query}&limit=5"
+                    },
+                    github: {
+                        name: "GitHub",
+                        icon: "fab fa-github",
+                        searchUrl: "https://api.github.com/search/repositories?q={query}&sort=stars&order=desc&per_page=5"
+                    },
+                    stackoverflow: {
+                        name: "StackOverflow",
+                        icon: "fab fa-stack-overflow",
+                        searchUrl: "https://api.stackexchange.com/2.3/search?order=desc&sort=activity&site=stackoverflow&intitle={query}"
+                    },
+                    wolfram: {
+                        name: "Wolfram Alpha",
+                        icon: "fas fa-calculator",
+                        searchUrl: "http://api.wolframalpha.com/v1/result?appid=YOUR_APP_ID&i={query}"
+                    }
+                };
+                
+                this.queryTypes = {
+                    news: ['новости', 'события', 'происшествия', 'актуальные', 'сегодня', 'вчера'],
+                    academic: ['исследование', 'научный', 'академический', 'статья', 'публикация', 'журнал'],
+                    video: ['видео', 'ютуб', 'youtube', 'ролик', 'трейлер', 'обзор'],
+                    code: ['код', 'программирование', 'github', 'репозиторий', 'пример кода'],
+                    discussion: ['обсуждение', 'форум', 'reddit', 'мнение', 'совет'],
+                    calculation: ['вычислить', 'посчитать', 'калькулятор', 'формула', 'уравнение'],
+                    definition: ['что такое', 'определение', 'значение', 'означает']
+                };
+            }
+
+            async searchInformation(query) {
+                console.log("🔍 Начинаем расширенный поиск методом:", this.currentMethod);
+                
+                // Проверяем кэш
+                const cacheKey = `${this.currentMethod}:${query}`;
+                const cachedResult = this.getFromCache(cacheKey);
+                if (cachedResult) {
+                    console.log("📦 Используем кэшированный результат");
+                    cachedResult.fromCache = true;
+                    return cachedResult;
+                }
+                
+                // Добавляем запрос в историю
+                this.searchHistory.push({
+                    query: query,
+                    method: this.currentMethod,
+                    timestamp: new Date().toISOString()
+                });
+                
+                // Определяем тип запроса для лучшего подбора источников
+                const queryType = this.detectQueryType(query);
+                console.log("📝 Определен тип запроса:", queryType);
+                
+                try {
+                    let results;
+                    
+                    // Если запрос подходит для определенного типа, используем соответствующий метод
+                    if (queryType && queryType !== this.currentMethod && this.searchServices[queryType]) {
+                        console.log("🔄 Автоматически переключаем метод на:", queryType);
+                        results = await this.searchWithMethod(queryType, query);
+                    } else {
+                        results = await this.searchWithMethod(this.currentMethod, query);
+                    }
+
+                    // Сохраняем в кэш
+                    this.saveToCache(cacheKey, results);
+                    
+                    return results;
+
+                } catch (error) {
+                    console.error('Search error:', error);
+                    
+                    // Пробуем альтернативный метод при ошибке
+                    try {
+                        console.log("🔄 Пробуем альтернативный метод поиска");
+                        const fallbackMethod = this.getFallbackMethod();
+                        const fallbackResults = await this.searchWithMethod(fallbackMethod, query);
+                        
+                        // Сохраняем в кэш
+                        this.saveToCache(cacheKey, fallbackResults);
+                        
+                        return fallbackResults;
+                    } catch (fallbackError) {
+                        console.error('Fallback search error:', fallbackError);
+                        return this.getFallbackResponse(query);
+                    }
+                }
+            }
+            
+            // Определение типа запроса
+            detectQueryType(query) {
+                const lowerQuery = query.toLowerCase();
+                
+                for (const [type, keywords] of Object.entries(this.queryTypes)) {
+                    if (keywords.some(keyword => lowerQuery.includes(keyword))) {
+                        return type;
+                    }
+                }
+                
+                // Определение по структуре запроса
+                if (lowerQuery.startsWith('что такое') || lowerQuery.startsWith('определение')) {
+                    return 'definition';
+                }
+                
+                if (/\d+[\+\-\*\/]\d+/.test(query) || 
+                    lowerQuery.includes('вычисли') || 
+                    lowerQuery.includes('посчитай')) {
+                    return 'calculation';
+                }
+                
+                return null;
+            }
+            
+            // Поиск с указанным методом
+            async searchWithMethod(method, query) {
+                switch(method) {
+                    case 'wikipedia':
+                        return await this.searchWikipedia(query);
+                    case 'duckduckgo':
+                        return await this.searchDuckDuckGo(query);
+                    case 'newsapi':
+                        return await this.searchNewsAPI(query);
+                    case 'google':
+                        return await this.searchGoogle(query);
+                    case 'academic':
+                        return await this.searchAcademic(query);
+                    case 'youtube':
+                        return await this.searchYouTube(query);
+                    case 'reddit':
+                        return await this.searchReddit(query);
+                    case 'github':
+                        return await this.searchGitHub(query);
+                    case 'stackoverflow':
+                        return await this.searchStackOverflow(query);
+                    case 'wolfram':
+                        return await this.searchWolfram(query);
+                    default:
+                        return await this.searchWikipedia(query);
+                }
+            }
+            
+            // Получение альтернативного метода при ошибке
+            getFallbackMethod() {
+                const fallbackMethods = ['duckduckgo', 'wikipedia', 'google'];
+                return fallbackMethods.find(method => method !== this.currentMethod) || 'wikipedia';
+            }
+
+            // Улучшенный поиск в Wikipedia
+            async searchWikipedia(query) {
+                try {
+                    const searchUrl = this.searchServices.wikipedia.searchUrl.replace('{query}', encodeURIComponent(query));
+                    
+                    console.log("📡 Запрос к Wikipedia:", searchUrl);
+                    
+                    const searchResponse = await fetch(searchUrl, {
+                        method: 'GET',
+                        headers: {
+                            'Accept': 'application/json',
+                        }
+                    });
+
+                    if (!searchResponse.ok) {
+                        throw new Error(`Wikipedia search failed: ${searchResponse.status}`);
+                    }
+
+                    const searchData = await searchResponse.json();
+                    
+                    if (searchData.query && searchData.query.search.length > 0) {
+                        const results = searchData.query.search.slice(0, 3); // Берем до 3 результатов
+                        let combinedContent = '';
+                        
+                        for (const result of results) {
+                            const title = result.title;
+                            const snippet = result.snippet;
+                            
+                            // Получаем полный текст статьи для первого результата
+                            if (result === results[0]) {
+                                const contentUrl = this.searchServices.wikipedia.contentUrl.replace('{title}', encodeURIComponent(title));
+                                const contentResponse = await fetch(contentUrl);
+                                
+                                if (contentResponse.ok) {
+                                    const contentData = await contentResponse.json();
+                                    const pages = contentData.query.pages;
+                                    const pageId = Object.keys(pages)[0];
+                                    
+                                    if (pages[pageId].extract) {
+                                        combinedContent += `**${title}**\n\n${pages[pageId].extract.substring(0, 1000)}...\n\n`;
+                                    } else {
+                                        combinedContent += `**${title}**\n\n${this.cleanHtml(snippet)}...\n\n`;
+                                    }
+                                }
+                            } else {
+                                // Для остальных результатов используем сниппет
+                                combinedContent += `**${title}**\n\n${this.cleanHtml(snippet)}...\n\n`;
+                            }
+                        }
+
+                        return {
+                            source: 'wikipedia',
+                            query: query,
+                            title: `Результаты Wikipedia: ${query}`,
+                            content: combinedContent,
+                            url: `https://ru.wikipedia.org/wiki/${encodeURIComponent(results[0].title)}`,
+                            fullResponse: this.formatWikipediaResponse(query, results, combinedContent)
+                        };
+                    }
+                    
+                    throw new Error('No results found in Wikipedia');
+                    
+                } catch (error) {
+                    console.error('Wikipedia search error:', error);
+                    throw error;
+                }
+            }
+
+            // Улучшенный поиск через DuckDuckGo
+            async searchDuckDuckGo(query) {
+                try {
+                    const searchUrl = this.searchServices.duckduckgo.searchUrl.replace('{query}', encodeURIComponent(query));
+                    
+                    console.log("📡 Запрос к DuckDuckGo:", searchUrl);
+                    
+                    const searchResponse = await fetch(searchUrl);
+                    
+                    if (!searchResponse.ok) {
+                        throw new Error(`DuckDuckGo search failed: ${searchResponse.status}`);
+                    }
+
+                    const searchData = await searchResponse.json();
+                    
+                    return {
+                        source: 'duckduckgo',
+                        query: query,
+                        title: searchData.Heading || query,
+                        content: searchData.AbstractText || this.getRelatedTopicsText(searchData),
+                        url: searchData.AbstractURL,
+                        fullResponse: this.formatDuckDuckGoResponse(query, searchData)
+                    };
+                            
+                } catch (error) {
+                    console.error('DuckDuckGo search error:', error);
+                    throw error;
+                }
+            }
+            
+            // Поиск новостей через NewsAPI
+            async searchNewsAPI(query) {
+                try {
+                    // В реальном приложении здесь должен быть ваш API ключ
+                    // Для демонстрации используем эмуляцию
+                    return await this.generateNewsResponse(query);
+                    
+                } catch (error) {
+                    console.error('NewsAPI search error:', error);
+                    throw error;
+                }
+            }
+
+            // Поиск через Google Custom Search
+            async searchGoogle(query) {
+                try {
+                    // В реальном приложении здесь должен быть ваш API ключ
+                    // Для демонстрации используем эмуляцию
+                    return await this.generateGoogleResponse(query);
+                    
+                } catch (error) {
+                    console.error('Google search error:', error);
+                    throw error;
+                }
+            }
+
+            // Академический поиск
+            async searchAcademic(query) {
+                try {
+                    // Эмуляция академического поиска
+                    return await this.generateAcademicResponse(query);
+                    
+                } catch (error) {
+                    console.error('Academic search error:', error);
+                    throw error;
+                }
+            }
+            
+            // Поиск на YouTube
+            async searchYouTube(query) {
+                try {
+                    // В реальном приложении здесь должен быть ваш API ключ
+                    // Для демонстрации используем эмуляцию
+                    return await this.generateYouTubeResponse(query);
+                    
+                } catch (error) {
+                    console.error('YouTube search error:', error);
+                    throw error;
+                }
+            }
+            
+            // Поиск на Reddit
+            async searchReddit(query) {
+                try {
+                    const searchUrl = this.searchServices.reddit.searchUrl.replace('{query}', encodeURIComponent(query));
+                    
+                    console.log("📡 Запрос к Reddit:", searchUrl);
+                    
+                    const searchResponse = await fetch(searchUrl);
+                    
+                    if (!searchResponse.ok) {
+                        throw new Error(`Reddit search failed: ${searchResponse.status}`);
+                    }
+
+                    const searchData = await searchResponse.json();
+                    
+                    if (searchData.data && searchData.data.children.length > 0) {
+                        const posts = searchData.data.children.slice(0, 5);
+                        let content = "**Актуальные обсуждения на Reddit:**\n\n";
+                        
+                        posts.forEach((post, index) => {
+                            const postData = post.data;
+                            content += `${index + 1}. **${postData.title}**\n`;
+                            content += `   👍 ${postData.ups} голосов | 💬 ${postData.num_comments} комментариев\n`;
+                            content += `   [Читать обсуждение](https://reddit.com${postData.permalink})\n\n`;
+                        });
+                        
+                        return {
+                            source: 'reddit',
+                            query: query,
+                            title: `Обсуждения на Reddit: ${query}`,
+                            content: content,
+                            fullResponse: content + "\n\n💬 *Источник: Reddit*"
+                        };
+                    }
+                    
+                    throw new Error('No results found in Reddit');
+                    
+                } catch (error) {
+                    console.error('Reddit search error:', error);
+                    throw error;
+                }
+            }
+            
+            // Поиск на GitHub
+            async searchGitHub(query) {
+                try {
+                    const searchUrl = this.searchServices.github.searchUrl.replace('{query}', encodeURIComponent(query));
+                    
+                    console.log("📡 Запрос к GitHub:", searchUrl);
+                    
+                    const searchResponse = await fetch(searchUrl);
+                    
+                    if (!searchResponse.ok) {
+                        throw new Error(`GitHub search failed: ${searchResponse.status}`);
+                    }
+
+                    const searchData = await searchResponse.json();
+                    
+                    if (searchData.items && searchData.items.length > 0) {
+                        const repos = searchData.items.slice(0, 5);
+                        let content = "**Популярные репозитории на GitHub:**\n\n";
+                        
+                        repos.forEach((repo, index) => {
+                            content += `${index + 1}. **${repo.name}**\n`;
+                            content += `   📝 ${repo.description || 'Описание отсутствует'}\n`;
+                            content += `   ⭐ ${repo.stargazers_count} звезд | 🍴 ${repo.forks_count} форков\n`;
+                            content += `   👨‍💻 ${repo.language || 'Не указан'}\n`;
+                            content += `   [Открыть репозиторий](${repo.html_url})\n\n`;
+                        });
+                        
+                        return {
+                            source: 'github',
+                            query: query,
+                            title: `Репозитории GitHub: ${query}`,
+                            content: content,
+                            fullResponse: content + "\n\n💻 *Источник: GitHub*"
+                        };
+                    }
+                    
+                    throw new Error('No results found in GitHub');
+                    
+                } catch (error) {
+                    console.error('GitHub search error:', error);
+                    throw error;
+                }
+            }
+            
+            // Поиск на StackOverflow
+            async searchStackOverflow(query) {
+                try {
+                    const searchUrl = this.searchServices.stackoverflow.searchUrl.replace('{query}', encodeURIComponent(query));
+                    
+                    console.log("📡 Запрос к StackOverflow:", searchUrl);
+                    
+                    const searchResponse = await fetch(searchUrl);
+                    
+                    if (!searchResponse.ok) {
+                        throw new Error(`StackOverflow search failed: ${searchResponse.status}`);
+                    }
+
+                    const searchData = await searchResponse.json();
+                    
+                    if (searchData.items && searchData.items.length > 0) {
+                        const questions = searchData.items.slice(0, 5);
+                        let content = "**Вопросы на StackOverflow:**\n\n";
+                        
+                        questions.forEach((question, index) => {
+                            content += `${index + 1}. **${question.title}**\n`;
+                            content += `   👍 ${question.score} голосов | ✅ ${question.answer_count} ответов\n`;
+                            content += `   👀 ${question.view_count} просмотров\n`;
+                            content += `   [Открыть вопрос](${question.link})\n\n`;
+                        });
+                        
+                        return {
+                            source: 'stackoverflow',
+                            query: query,
+                            title: `Вопросы StackOverflow: ${query}`,
+                            content: content,
+                            fullResponse: content + "\n\n❓ *Источник: StackOverflow*"
+                        };
+                    }
+                    
+                    throw new Error('No results found in StackOverflow');
+                    
+                } catch (error) {
+                    console.error('StackOverflow search error:', error);
+                    throw error;
+                }
+            }
+            
+            // Поиск через Wolfram Alpha
+            async searchWolfram(query) {
+                try {
+                    // В реальном приложении здесь должен быть ваш API ключ
+                    // Для демонстрации используем эмуляцию
+                    return await this.generateWolframResponse(query);
+                    
+                } catch (error) {
+                    console.error('Wolfram search error:', error);
+                    throw error;
+                }
+            }
+
+            // Эмуляция новостей
+            async generateNewsResponse(query) {
+                const currentDate = new Date().toLocaleDateString('ru-RU');
+                const newsTopics = {
+                    'технологии': [
+                        {title: "Новые достижения в области искусственного интеллекта", source: "TechNews", date: currentDate, url: "#"},
+                        {title: "Революция в квантовых вычислениях", source: "Science Daily", date: currentDate, url: "#"}
+                    ],
+                    'политика': [
+                        {title: "Международные переговоры по климату", source: "Global News", date: currentDate, url: "#"},
+                        {title: "Новые экономические санкции", source: "Financial Times", date: currentDate, url: "#"}
+                    ],
+                    'спорт': [
+                        {title: "Результаты чемпионата мира по футболу", source: "Sports.ru", date: currentDate, url: "#"},
+                        {title: "Новые рекорды в легкой атлетике", source: "Olympic Channel", date: currentDate, url: "#"}
+                    ],
+                    'наука': [
+                        {title: "Открытие новой экзопланеты", source: "NASA", date: currentDate, url: "#"},
+                        {title: "Прорыв в исследованиях рака", source: "Nature", date: currentDate, url: "#"}
+                    ]
+                };
+
+                let matchedNews = [];
+                const lowerQuery = query.toLowerCase();
+                
+                for (const [topic, news] of Object.entries(newsTopics)) {
+                    if (lowerQuery.includes(topic)) {
+                        matchedNews = news;
+                        break;
+                    }
+                }
+
+                if (matchedNews.length === 0) {
+                    matchedNews = [
+                        {title: "Актуальные новости по вашему запросу", source: "NewsAPI", date: currentDate, url: "#"},
+                        {title: "Свежие публикации в СМИ", source: "MediaMonitor", date: currentDate, url: "#"}
+                    ];
+                }
+
+                let newsContent = "📰 **Последние новости по вашему запросу:**\n\n";
+                matchedNews.forEach((news, index) => {
+                    newsContent += `${index + 1}. **${news.title}**\n`;
+                    newsContent += `   📅 ${news.date} | 📰 ${news.source}\n`;
+                    newsContent += `   [Читать далее](${news.url})\n\n`;
+                });
+
+                return {
+                    source: 'newsapi',
+                    query: query,
+                    title: "Новости по запросу: " + query,
+                    content: newsContent,
+                    fullResponse: newsContent + "\n\n🔍 *Источник: эмуляция NewsAPI*"
+                };
+            }
+
+            // Эмуляция Google поиска
+            async generateGoogleResponse(query) {
+                const searchResults = [
+                    {
+                        title: `Результаты поиска: ${query}`,
+                        snippet: "Найдено множество релевантных страниц по вашему запросу. Google предоставляет наиболее точные и актуальные результаты поиска.",
+                        link: `https://www.google.com/search?q=${encodeURIComponent(query)}`
+                    },
+                    {
+                        title: "Связанные запросы",
+                        snippet: "Пользователи также ищут: дополнительная информация, подробное объяснение, последние новости, видео материалы.",
+                        link: "#"
+                    }
+                ];
+
+                let googleContent = "🔍 **Результаты поиска Google:**\n\n";
+                searchResults.forEach((result, index) => {
+                    googleContent += `${index + 1}. **${result.title}**\n`;
+                    googleContent += `   ${result.snippet}\n`;
+                    googleContent += `   [Открыть](${result.link})\n\n`;
+                });
+
+                return {
+                    source: 'google',
+                    query: query,
+                    title: "Google: " + query,
+                    content: googleContent,
+                    fullResponse: googleContent + "\n\n⚠️ *Это демонстрация. В реальном приложении требуется API ключ Google.*"
+                };
+            }
+
+            // Эмуляция академического поиска
+            async generateAcademicResponse(query) {
+                const academicResults = [
+                    {
+                        title: "Современные исследования в области " + query,
+                        authors: "Иванов А.А., Петров Б.Б., Сидоров В.В.",
+                        journal: "Журнал научных исследований",
+                        year: "2023",
+                        abstract: "В данной статье рассматриваются актуальные вопросы и последние достижения в указанной области науки. Проведен анализ современных тенденций и перспектив развития.",
+                        link: "#"
+                    },
+                    {
+                        title: "Экспериментальное изучение " + query,
+                        authors: "Смирнова Г.Д., Козлов Е.Ж.",
+                        journal: "Международный научный вестник",
+                        year: "2022",
+                        abstract: "Представлены результаты экспериментальных исследований, проведенных с использованием современных методик и оборудования. Обсуждаются полученные данные и их интерпретация.",
+                        link: "#"
+                    }
+                ];
+
+                let academicContent = "🎓 **Академические публикации по вашему запросу:**\n\n";
+                academicResults.forEach((result, index) => {
+                    academicContent += `${index + 1}. **${result.title}**\n`;
+                    academicContent += `   👨‍🎓 Авторы: ${result.authors}\n`;
+                    academicContent += `   📚 Журнал: ${result.journal}, ${result.year}\n`;
+                    academicContent += `   📄 Аннотация: ${result.abstract}\n`;
+                    academicContent += `   [Читать статью](${result.link})\n\n`;
+                });
+
+                return {
+                    source: 'academic',
+                    query: query,
+                    title: "Академический поиск: " + query,
+                    content: academicContent,
+                    fullResponse: academicContent + "\n\n🔬 *Источник: эмуляция академического поиска*"
+                };
+            }
+
+            // Эмуляция YouTube поиска
+            async generateYouTubeResponse(query) {
+                const videos = [
+                    {
+                        title: `Видео по запросу: ${query}`,
+                        channel: "Popular Science Channel",
+                        views: "1.2M",
+                        duration: "15:30",
+                        url: "#"
+                    },
+                    {
+                        title: `Обзор: ${query}`,
+                        channel: "Tech Reviews",
+                        views: "850K",
+                        duration: "22:15",
+                        url: "#"
+                    }
+                ];
+
+                let youtubeContent = "🎬 **Видео по вашему запросу:**\n\n";
+                videos.forEach((video, index) => {
+                    youtubeContent += `${index + 1}. **${video.title}**\n`;
+                    youtubeContent += `   📺 ${video.channel}\n`;
+                    youtubeContent += `   👀 ${video.views} просмотров | ⏱ ${video.duration}\n`;
+                    youtubeContent += `   [Смотреть видео](${video.url})\n\n`;
+                });
+
+                return {
+                    source: 'youtube',
+                    query: query,
+                    title: "YouTube: " + query,
+                    content: youtubeContent,
+                    fullResponse: youtubeContent + "\n\n🎥 *Источник: эмуляция YouTube API*"
+                };
+            }
+            
+            // Эмуляция Wolfram Alpha
+            async generateWolframResponse(query) {
+                let answer = "Вычисление...\n\n";
+                
+                // Простые математические вычисления
+                if (/\d+[\+\-\*\/]\d+/.test(query)) {
+                    try {
+                        // Безопасное вычисление математических выражений
+                        const result = this.safeEval(query);
+                        answer += `**Результат:** ${query} = ${result}`;
+                    } catch (e) {
+                        answer += `Не удалось вычислить выражение: ${query}`;
+                    }
+                } else if (query.toLowerCase().includes('погода')) {
+                    answer += `**Погода:** Текущая температура +18°C, ясно, влажность 65%`;
+                } else if (query.toLowerCase().includes('время')) {
+                    answer += `**Время:** ${new Date().toLocaleString('ru-RU')}`;
+                } else {
+                    answer += `Факт: ${query} - это интересная тема для изучения. Для получения точных данных используйте официальные источники.`;
+                }
+
+                return {
+                    source: 'wolfram',
+                    query: query,
+                    title: "Wolfram Alpha: " + query,
+                    content: answer,
+                    fullResponse: `🧮 **Wolfram Alpha по запросу "${query}":**\n\n${answer}\n\n🔢 *Источник: эмуляция Wolfram Alpha*`
+                };
+            }
+            
+            // Безопасное вычисление математических выражений
+            safeEval(expression) {
+                // Удаляем все символы, кроме цифр и основных операторов
+                const cleanExpr = expression.replace(/[^\d\+\-\*\/\(\)\.]/g, '');
+                
+                // Используем Function для безопасного вычисления
+                try {
+                    return Function(`"use strict"; return (${cleanExpr})`)();
+                } catch (e) {
+                    throw new Error('Недопустимое математическое выражение');
+                }
+            }
+
+            // Вспомогательные методы для DuckDuckGo
+            getRelatedTopicsText(data) {
+                if (data.RelatedTopics && data.RelatedTopics.length > 0) {
+                    return data.RelatedTopics.slice(0, 3)
+                        .map(topic => topic.Text)
+                        .join('\n\n');
+                }
+                return 'Информация найдена, но не содержит текста';
+            }
+
+            // Улучшенное форматирование ответов
+            formatWikipediaResponse(query, results, content) {
+                let response = `📚 **Найдено в Wikipedia по запросу "${query}":**\n\n`;
+                response += content;
+                response += `\n🔗 [Открыть в Wikipedia](https://ru.wikipedia.org/wiki/${encodeURIComponent(results[0].title)})`;
+                response += `\n\n📖 *Источник: Wikipedia — свободная энциклопедия*`;
+                
+                return response;
+            }
+
+            formatDuckDuckGoResponse(query, data) {
+                let response = `🦆 **Результаты DuckDuckGo по запросу "${query}":**\n\n`;
+                
+                if (data.AbstractText) {
+                    response += `**${data.Heading || query}**\n\n`;
+                    response += `${data.AbstractText}\n\n`;
+                    
+                    if (data.AbstractURL) {
+                        response += `🔗 [Подробнее](${data.AbstractURL})\n\n`;
+                    }
+                }
+                
+                if (data.RelatedTopics && data.RelatedTopics.length > 0) {
+                    response += "**Связанные темы:**\n";
+                    data.RelatedTopics.slice(0, 3).forEach(topic => {
+                        if (topic.Text) {
+                            response += `• ${topic.Text}\n`;
+                        }
+                    });
+                    response += '\n';
+                }
+                
+                response += `🌐 *Источник: DuckDuckGo Instant Answers*`;
+                
+                return response;
+            }
+
+            // Кэширование результатов
+            getFromCache(key) {
+                const cached = this.cache.get(key);
+                if (cached && Date.now() - cached.timestamp < this.cacheTimeout) {
+                    return cached.data;
+                }
+                this.cache.delete(key); // Удаляем просроченный кэш
+                return null;
+            }
+
+            saveToCache(key, data) {
+                this.cache.set(key, {
+                    data: data,
+                    timestamp: Date.now()
+                });
+                
+                // Ограничиваем размер кэша
+                if (this.cache.size > 100) {
+                    const firstKey = this.cache.keys().next().value;
+                    this.cache.delete(firstKey);
+                }
+            }
+
+            // Резервный ответ
+            getFallbackResponse(query) {
+                return {
+                    source: 'fallback',
+                    query: query,
+                    title: query,
+                    content: `К сожалению, в данный момент не удалось подключиться к онлайн-источникам. ` +
+                            `Рекомендую проверить интернет-соединение и попробовать снова. ` +
+                            `Для поиска информации вы можете напрямую посетить Wikipedia.org или использовать другие поисковые системы.`,
+                    fullResponse: `❌ **Временные технические трудности**\n\n` +
+                                `Не удалось выполнить онлайн-поиск по запросу "${query}".\n\n` +
+                                `🔧 **Рекомендации:**\n` +
+                                `• Проверьте интернет-соединение\n` +
+                                `• Попробуйте обновить страницу\n` +
+                                `• Посетите напрямую ru.wikipedia.org\n\n` +
+                                `💡 Вы также можете задать другой вопрос или попробовать другой метод поиска.`
+                };
+            }
+
+            cleanHtml(text) {
+                return text.replace(/<[^>]*>/g, '').replace(/&\w+;/g, '');
+            }
+
+            // Установка метода поиска
+            setSearchMethod(method) {
+                if (this.searchServices[method]) {
+                    this.currentMethod = method;
+                    return true;
+                }
+                return false;
+            }
+            
+            // Получение истории поиска
+            getSearchHistory() {
+                return this.searchHistory;
+            }
+            
+            // Очистка истории поиска
+            clearSearchHistory() {
+                this.searchHistory = [];
+            }
+            
+            // Очистка кэша
+            clearCache() {
+                this.cache.clear();
+            }
+        }
+
+        // Класс для админ-панели
+        class AdminPanel {
+            constructor(searchEngine) {
+                this.searchEngine = searchEngine;
+                this.isAuthenticated = false;
+                this.adminPassword = "admin123"; // Пароль по умолчанию
+                this.stats = {
+                    totalSearches: 0,
+                    activeUsers: 1,
+                    cacheSize: 0,
+                    responseTime: 0,
+                    searchMethods: {}
+                };
+                
+                this.settings = {
+                    systemName: "Атом",
+                    systemDescription: "Расширенный поисковый ассистент с доступом к актуальной информации из различных источников",
+                    cacheTimeout: 5,
+                    maxCacheSize: 100,
+                    maxResults: 5,
+                    defaultLanguage: "ru",
+                    safeSearch: true,
+                    spamProtection: true,
+                    privacyProtection: true,
+                    rateLimit: 60,
+                    maintenanceMode: false,
+                    cachingEnabled: true,
+                    analyticsEnabled: true
+                };
+                
+                this.userActivity = [
+                    { id: 1, username: "admin", action: "Вход в систему", timestamp: new Date().toISOString() },
+                    { id: 2, username: "user1", action: "Поиск: Искусственный интеллект", timestamp: new Date(Date.now() - 300000).toISOString() },
+                    { id: 3, username: "user2", action: "Поиск: Квантовая физика", timestamp: new Date(Date.now() - 600000).toISOString() }
+                ];
+                
+                this.popularQueries = [
+                    { query: "Искусственный интеллект", count: 15 },
+                    { query: "Квантовая физика", count: 12 },
+                    { query: "Python программирование", count: 10 },
+                    { query: "Климатические изменения", count: 8 },
+                    { query: "Машинное обучение", count: 7 }
+                ];
+                
+                this.init();
+            }
+            
+            init() {
+                this.updateStats();
+                this.renderSearchMethods();
+                this.renderUserActivity();
+                this.renderPopularQueries();
+                this.loadSettings();
+            }
+            
+            // Аутентификация
+            authenticate(password) {
+                if (password === this.adminPassword) {
+                    this.isAuthenticated = true;
+                    return true;
+                }
+                return false;
+            }
+            
+            // Выход из системы
+            logout() {
+                this.isAuthenticated = false;
+            }
+            
+            updateStats() {
+                // Обновляем статистику
+                this.stats.totalSearches = this.searchEngine.getSearchHistory().length;
+                this.stats.cacheSize = Math.round(this.searchEngine.cache.size * 0.1); // Примерный расчет размера кэша
+                
+                // Обновляем статистику методов поиска
+                const searchHistory = this.searchEngine.getSearchHistory();
+                this.stats.searchMethods = {};
+                
+                searchHistory.forEach(entry => {
+                    if (this.stats.searchMethods[entry.method]) {
+                        this.stats.searchMethods[entry.method]++;
+                    } else {
+                        this.stats.searchMethods[entry.method] = 1;
+                    }
+                });
+                
+                // Обновляем DOM
+                document.getElementById('totalSearches').textContent = this.stats.totalSearches;
+                document.getElementById('activeUsers').textContent = this.stats.activeUsers;
+                document.getElementById('cacheSize').textContent = this.stats.cacheSize;
+                document.getElementById('responseTime').textContent = this.stats.responseTime + 'мс';
+            }
+            
+            renderSearchMethods() {
+                const container = document.getElementById('searchMethodsStats');
+                container.innerHTML = '';
+                
+                Object.entries(this.stats.searchMethods).forEach(([method, count]) => {
+                    const methodDiv = document.createElement('div');
+                    methodDiv.className = 'admin-list-item';
+                    
+                    methodDiv.innerHTML = `
+                        <div class="admin-list-item-content">
+                            <div class="admin-list-item-title">${method}</div>
+                            <div class="admin-list-item-subtitle">${count} запросов</div>
+                        </div>
+                        <div class="admin-list-item-actions">
+                            <button class="admin-list-item-action" data-method="${method}">
+                                <i class="fas fa-chart-bar"></i>
+                            </button>
+                        </div>
+                    `;
+                    
+                    container.appendChild(methodDiv);
+                });
+                
+                // Если нет статистики, показываем сообщение
+                if (Object.keys(this.stats.searchMethods).length === 0) {
+                    container.innerHTML = '<div class="admin-stat-label">Нет данных о методах поиска</div>';
+                }
+            }
+            
+            renderUserActivity() {
+                const container = document.getElementById('userActivityList');
+                container.innerHTML = '';
+                
+                this.userActivity.forEach(activity => {
+                    const activityDiv = document.createElement('div');
+                    activityDiv.className = 'admin-list-item';
+                    
+                    const date = new Date(activity.timestamp);
+                    const formattedDate = date.toLocaleString('ru-RU');
+                    
+                    activityDiv.innerHTML = `
+                        <div class="admin-list-item-content">
+                            <div class="admin-list-item-title">${activity.username}</div>
+                            <div class="admin-list-item-subtitle">${activity.action}</div>
+                            <div class="admin-list-item-subtitle">${formattedDate}</div>
+                        </div>
+                        <div class="admin-list-item-actions">
+                            <button class="admin-list-item-action">
+                                <i class="fas fa-info-circle"></i>
+                            </button>
+                        </div>
+                    `;
+                    
+                    container.appendChild(activityDiv);
+                });
+            }
+            
+            renderPopularQueries() {
+                const container = document.getElementById('popularQueries');
+                container.innerHTML = '';
+                
+                this.popularQueries.forEach((query, index) => {
+                    const queryDiv = document.createElement('div');
+                    queryDiv.className = 'admin-list-item';
+                    
+                    queryDiv.innerHTML = `
+                        <div class="admin-list-item-content">
+                            <div class="admin-list-item-title">${index + 1}. ${query.query}</div>
+                            <div class="admin-list-item-subtitle">${query.count} запросов</div>
+                        </div>
+                        <div class="admin-list-item-actions">
+                            <button class="admin-list-item-action">
+                                <i class="fas fa-chart-line"></i>
+                            </button>
+                        </div>
+                    `;
+                    
+                    container.appendChild(queryDiv);
+                });
+            }
+            
+            loadSettings() {
+                // Загружаем настройки в форму
+                document.getElementById('systemName').value = this.settings.systemName;
+                document.getElementById('systemDescription').value = this.settings.systemDescription;
+                document.getElementById('cacheTimeout').value = this.settings.cacheTimeout;
+                document.getElementById('maxCacheSize').value = this.settings.maxCacheSize;
+                document.getElementById('maxResults').value = this.settings.maxResults;
+                document.getElementById('defaultLanguage').value = this.settings.defaultLanguage;
+                document.getElementById('rateLimit').value = this.settings.rateLimit;
+                
+                // Устанавливаем переключатели
+                document.getElementById('safeSearch').checked = this.settings.safeSearch;
+                document.getElementById('spamProtection').checked = this.settings.spamProtection;
+                document.getElementById('privacyProtection').checked = this.settings.privacyProtection;
+                document.getElementById('maintenanceMode').checked = this.settings.maintenanceMode;
+                document.getElementById('cachingEnabled').checked = this.settings.cachingEnabled;
+                document.getElementById('analyticsEnabled').checked = this.settings.analyticsEnabled;
+                
+                // Рендерим методы поиска по умолчанию
+                this.renderDefaultSearchMethods();
+            }
+            
+            renderDefaultSearchMethods() {
+                const container = document.getElementById('defaultSearchMethods');
+                container.innerHTML = '';
+                
+                Object.entries(this.searchEngine.searchServices).forEach(([key, service]) => {
+                    const methodDiv = document.createElement('div');
+                    methodDiv.className = 'admin-toggle';
+                    
+                    methodDiv.innerHTML = `
+                        <div class="admin-label">${service.name}</div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" data-method="${key}" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    `;
+                    
+                    container.appendChild(methodDiv);
+                });
+            }
+            
+            saveSettings() {
+                // Сохраняем настройки из формы
+                this.settings.systemName = document.getElementById('systemName').value;
+                this.settings.systemDescription = document.getElementById('systemDescription').value;
+                this.settings.cacheTimeout = parseInt(document.getElementById('cacheTimeout').value);
+                this.settings.maxCacheSize = parseInt(document.getElementById('maxCacheSize').value);
+                this.settings.maxResults = parseInt(document.getElementById('maxResults').value);
+                this.settings.defaultLanguage = document.getElementById('defaultLanguage').value;
+                this.settings.rateLimit = parseInt(document.getElementById('rateLimit').value);
+                
+                // Сохраняем переключатели
+                this.settings.safeSearch = document.getElementById('safeSearch').checked;
+                this.settings.spamProtection = document.getElementById('spamProtection').checked;
+                this.settings.privacyProtection = document.getElementById('privacyProtection').checked;
+                this.settings.maintenanceMode = document.getElementById('maintenanceMode').checked;
+                this.settings.cachingEnabled = document.getElementById('cachingEnabled').checked;
+                this.settings.analyticsEnabled = document.getElementById('analyticsEnabled').checked;
+                
+                // Применяем настройки к поисковой системе
+                this.searchEngine.cacheTimeout = this.settings.cacheTimeout * 60 * 1000;
+                
+                // Показываем сообщение об успешном сохранении
+                this.showMessage('Настройки успешно сохранены', 'success');
+                
+                // Обновляем интерфейс
+                this.updateSystemInfo();
+            }
+            
+            updateSystemInfo() {
+                // Обновляем информацию о системе в основном интерфейсе
+                document.querySelector('h1').textContent = this.settings.systemName;
+                document.querySelector('.subtitle').textContent = this.settings.systemDescription;
+            }
+            
+            showMessage(message, type = 'info') {
+                // Создаем элемент сообщения
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `admin-message ${type}-message`;
+                messageDiv.textContent = message;
+                
+                // Добавляем в админ-панель
+                const adminContent = document.querySelector('.admin-content');
+                adminContent.insertBefore(messageDiv, adminContent.firstChild);
+                
+                // Удаляем через 3 секунды
+                setTimeout(() => {
+                    messageDiv.remove();
+                }, 3000);
+            }
+            
+            exportData(dataType, format) {
+                let data = '';
+                let filename = '';
+                
+                switch(dataType) {
+                    case 'search_history':
+                        data = JSON.stringify(this.searchEngine.getSearchHistory(), null, 2);
+                        filename = `search_history_${new Date().toISOString().split('T')[0]}.${format}`;
+                        break;
+                    case 'user_activity':
+                        data = JSON.stringify(this.userActivity, null, 2);
+                        filename = `user_activity_${new Date().toISOString().split('T')[0]}.${format}`;
+                        break;
+                    case 'system_logs':
+                        data = JSON.stringify({
+                            stats: this.stats,
+                            settings: this.settings
+                        }, null, 2);
+                        filename = `system_logs_${new Date().toISOString().split('T')[0]}.${format}`;
+                        break;
+                    case 'analytics_data':
+                        data = JSON.stringify({
+                            popularQueries: this.popularQueries,
+                            searchMethods: this.stats.searchMethods
+                        }, null, 2);
+                        filename = `analytics_data_${new Date().toISOString().split('T')[0]}.${format}`;
+                        break;
+                }
+                
+                // Конвертируем в нужный формат
+                if (format === 'csv') {
+                    data = this.convertToCSV(data);
+                } else if (format === 'xml') {
+                    data = this.convertToXML(data);
+                }
+                
+                // Создаем и скачиваем файл
+                const blob = new Blob([data], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                this.showMessage(`Данные экспортированы в формате ${format.toUpperCase()}`, 'success');
+            }
+            
+            convertToCSV(jsonData) {
+                // Простая конвертация JSON в CSV
+                const data = JSON.parse(jsonData);
+                if (!Array.isArray(data) || data.length === 0) return '';
+                
+                const headers = Object.keys(data[0]);
+                const csv = [headers.join(',')];
+                
+                data.forEach(item => {
+                    const row = headers.map(header => {
+                        let value = item[header];
+                        if (typeof value === 'string' && value.includes(',')) {
+                            value = `"${value}"`;
+                        }
+                        return value;
+                    });
+                    csv.push(row.join(','));
+                });
+                
+                return csv.join('\n');
+            }
+            
+            convertToXML(jsonData) {
+                // Простая конвертация JSON в XML
+                const data = JSON.parse(jsonData);
+                let xml = '<?xml version="1.0" encoding="UTF-8"?>\n<data>\n';
+                
+                if (Array.isArray(data)) {
+                    data.forEach(item => {
+                        xml += '  <item>\n';
+                        Object.entries(item).forEach(([key, value]) => {
+                            xml += `    <${key}>${value}</${key}>\n`;
+                        });
+                        xml += '  </item>\n';
+                    });
+                } else {
+                    Object.entries(data).forEach(([key, value]) => {
+                        if (typeof value === 'object') {
+                            xml += `  <${key}>\n`;
+                            Object.entries(value).forEach(([subKey, subValue]) => {
+                                xml += `    <${subKey}>${subValue}</${subKey}>\n`;
+                            });
+                            xml += `  </${key}>\n`;
+                        } else {
+                            xml += `  <${key}>${value}</${key}>\n`;
+                        }
+                    });
+                }
+                
+                xml += '</data>';
+                return xml;
+            }
+            
+            clearData(dataType) {
+                let message = '';
+                
+                switch(dataType) {
+                    case 'cache':
+                        this.searchEngine.clearCache();
+                        message = 'Кэш поиска очищен';
+                        break;
+                    case 'search_history':
+                        this.searchEngine.clearSearchHistory();
+                        message = 'История поиска очищена';
+                        break;
+                    case 'user_data':
+                        this.userActivity = [];
+                        message = 'Данные пользователей очищены';
+                        break;
+                    case 'analytics':
+                        this.popularQueries = [];
+                        this.stats.searchMethods = {};
+                        message = 'Аналитические данные очищены';
+                        break;
+                }
+                
+                this.updateStats();
+                this.renderSearchMethods();
+                this.renderPopularQueries();
+                this.showMessage(message, 'success');
+            }
+        }
+
+        // Инициализация улучшенного поиска
+        const searcher = new EnhancedInternetSearch();
+        
+        // Инициализация админ-панели
+        const adminPanel = new AdminPanel(searcher);
+
+        // DOM элементы
+        const conversation = document.getElementById('conversation');
+        const chatInput = document.getElementById('chatInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const typingIndicator = document.getElementById('typingIndicator');
+        const searchMethods = document.querySelectorAll('.search-method');
+        const clearChatBtn = document.getElementById('clearChat');
+        const exportChatBtn = document.getElementById('exportChat');
+        const settingsBtn = document.getElementById('settingsBtn');
+        const suggestions = document.querySelectorAll('.suggestion');
+        const voiceSearchBtn = document.getElementById('voiceSearch');
+        const imageSearchBtn = document.getElementById('imageSearch');
+        const advancedSearchBtn = document.getElementById('advancedSearch');
+
+        // Элементы админ-панели
+        const adminPanelElement = document.getElementById('adminPanel');
+        const adminOpenBtn = document.getElementById('adminOpenBtn');
+        const adminCloseBtn = document.getElementById('adminCloseBtn');
+        const adminOverlay = document.getElementById('adminOverlay');
+        const adminTabs = document.querySelectorAll('.admin-tab');
+        const saveSettingsBtn = document.getElementById('saveSettings');
+        const exportDataBtn = document.getElementById('exportDataBtn');
+        const clearDataBtn = document.getElementById('clearDataBtn');
+
+        // Элементы формы входа
+        const adminLogin = document.getElementById('adminLogin');
+        const adminPasswordInput = document.getElementById('adminPassword');
+        const loginButton = document.getElementById('loginButton');
+        const loginError = document.getElementById('loginError');
+
+        // Обработчики выбора метода поиска
+        searchMethods.forEach(method => {
+            method.addEventListener('click', function() {
+                if (this.classList.contains('active') || this.disabled) return;
+                
+                // Обновляем активный метод
+                searchMethods.forEach(m => m.classList.remove('active'));
+                this.classList.add('active');
+                
+                const methodName = this.getAttribute('data-method');
+                if (searcher.setSearchMethod(methodName)) {
+                    addMessage(`🔍 Метод поиска изменен на: ${methodName.toUpperCase()}`, false);
+                }
+            });
+        });
+
+        // Функция добавления сообщения
+        function addMessage(text, isUser = false, data = null) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user-message' : 'assistant-message'}`;
+            
+            const messageContent = document.createElement('div');
+            messageContent.className = 'message-content';
+            
+            if (data && !isUser) {
+                // Добавляем индикатор кэша, если результат из кэша
+                let cacheIndicator = '';
+                if (data.fromCache) {
+                    cacheIndicator = '<div class="success-message"><i class="fas fa-bolt"></i> Результат из кэша (быстрый доступ)</div>';
+                }
+                
+                // Форматируем текст с переносами строк и ссылками
+                let formattedText = data.fullResponse
+                    .replace(/\n/g, '<br>')
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                    .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" class="wiki-link"><i class="fas fa-external-link-alt"></i> $1</a>');
+                
+                messageContent.innerHTML = cacheIndicator + formattedText;
+                
+                // Добавляем индикатор источника
+                const sourceIndicator = document.createElement('div');
+                sourceIndicator.className = 'search-results';
+                
+                let sourceText = '';
+                let sourceIcon = '';
+                switch(data.source) {
+                    case 'wikipedia':
+                        sourceText = 'Реальный поиск в Wikipedia';
+                        sourceIcon = 'fab fa-wikipedia-w';
+                        break;
+                    case 'duckduckgo':
+                        sourceText = 'Поиск через DuckDuckGo Instant Answers';
+                        sourceIcon = 'fas fa-search';
+                        break;
+                    case 'newsapi':
+                        sourceText = 'Новости через NewsAPI';
+                        sourceIcon = 'far fa-newspaper';
+                        break;
+                    case 'google':
+                        sourceText = 'Поиск через Google API';
+                        sourceIcon = 'fab fa-google';
+                        break;
+                    case 'academic':
+                        sourceText = 'Академический поиск';
+                        sourceIcon = 'fas fa-graduation-cap';
+                        break;
+                    case 'youtube':
+                        sourceText = 'Поиск видео на YouTube';
+                        sourceIcon = 'fab fa-youtube';
+                        break;
+                    case 'reddit':
+                        sourceText = 'Обсуждения на Reddit';
+                        sourceIcon = 'fab fa-reddit';
+                        break;
+                    case 'github':
+                        sourceText = 'Код на GitHub';
+                        sourceIcon = 'fab fa-github';
+                        break;
+                    case 'stackoverflow':
+                        sourceText = 'Вопросы на StackOverflow';
+                        sourceIcon = 'fab fa-stack-overflow';
+                        break;
+                    case 'wolfram':
+                        sourceText = 'Вычисления через Wolfram Alpha';
+                        sourceIcon = 'fas fa-calculator';
+                        break;
+                    default:
+                        sourceText = 'Поиск в интернете';
+                        sourceIcon = 'fas fa-globe';
+                }
+                
+                sourceIndicator.innerHTML = `<i class="${sourceIcon}"></i> ${sourceText}`;
+                messageDiv.appendChild(messageContent);
+                messageDiv.appendChild(sourceIndicator);
+                
+            } else {
+                messageContent.textContent = text;
+                messageDiv.appendChild(messageContent);
+            }
+            
+            // Добавляем время сообщения
+            const messageTime = document.createElement('div');
+            messageTime.className = 'message-time';
+            messageTime.textContent = new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+            messageDiv.appendChild(messageTime);
+            
+            conversation.appendChild(messageDiv);
+            conversation.scrollTop = conversation.scrollHeight;
+            
+            // Обновляем статистику в админ-панели
+            adminPanel.updateStats();
+        }
+
+        // Обработка отправки сообщения
+        async function handleSendMessage() {
+            const message = chatInput.value.trim();
+            if (!message) return;
+
+            console.log("🔄 Начинаем обработку запроса:", message);
+
+            // Блокируем кнопку отправки
+            sendBtn.disabled = true;
+            chatInput.disabled = true;
+            chatInput.placeholder = "Идет поиск в интернете...";
+
+            // Добавляем сообщение пользователя
+            addMessage(message, true);
+            chatInput.value = '';
+
+            // Показываем индикатор набора
+            typingIndicator.classList.add('active');
+
+            try {
+                // Выполняем расширенный поиск
+                const searchResult = await searcher.searchInformation(message);
+                addMessage("", false, searchResult);
+                
+            } catch (error) {
+                console.error('Main search error:', error);
+                addMessage("❌ Ошибка при поиске информации. Попробуйте другой запрос или проверьте соединение.", false);
+            } finally {
+                // Снимаем блокировку
+                typingIndicator.classList.remove('active');
+                sendBtn.disabled = false;
+                chatInput.disabled = false;
+                chatInput.placeholder = "Задайте вопрос для поиска в интернете...";
+                chatInput.focus();
+            }
+        }
+
+        // Очистка чата
+        clearChatBtn.addEventListener('click', function() {
+            if (confirm("Вы уверены, что хотите очистить всю историю чата?")) {
+                conversation.innerHTML = '';
+                addMessage("История чата очищена. Чем я могу вам помочь?", false);
+            }
+        });
+
+        // Экспорт чата
+        exportChatBtn.addEventListener('click', function() {
+            const chatText = Array.from(conversation.children)
+                .map(msg => {
+                    const isUser = msg.classList.contains('user-message');
+                    const content = msg.querySelector('.message-content').textContent;
+                    return `${isUser ? 'Вы' : 'Атом'}: ${content}`;
+                })
+                .join('\n\n');
+            
+            const blob = new Blob([chatText], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `атом-чат-${new Date().toISOString().split('T')[0]}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            addMessage("✅ История чата экспортирована в файл", false);
+        });
+
+        // Настройки
+        settingsBtn.addEventListener('click', function() {
+            addMessage("⚙️ **Настройки поиска:**\n\n" +
+                      "• **Автосохранение истории:** Включено\n" +
+                      "• **Безопасный поиск:** Включен\n" +
+                      "• **Язык интерфейса:** Русский\n" +
+                      "• **Режим конфиденциальности:** Стандартный\n" +
+                      "• **Кэширование результатов:** Включено\n\n" +
+                      "Для изменения настроек обратитесь к администратору системы.", false);
+        });
+
+        // Быстрые подсказки
+        suggestions.forEach(suggestion => {
+            suggestion.addEventListener('click', function() {
+                const query = this.getAttribute('data-query');
+                chatInput.value = query;
+                chatInput.focus();
+            });
+        });
+
+        // Голосовой поиск
+        voiceSearchBtn.addEventListener('click', function() {
+            addMessage("🎤 Голосовой поиск временно недоступен. Пожалуйста, используйте текстовый ввод.", false);
+        });
+
+        // Поиск по изображению
+        imageSearchBtn.addEventListener('click', function() {
+            addMessage("🖼️ Поиск по изображению временно недоступен. Пожалуйста, используйте текстовый ввод.", false);
+        });
+
+        // Расширенный поиск
+        advancedSearchBtn.addEventListener('click', function() {
+            addMessage("🔍 **Расширенный поиск:**\n\n" +
+                      "Доступные фильтры:\n" +
+                      "• По дате публикации\n" +
+                      "• По языку\n" +
+                      "• По типу контента\n" +
+                      "• По источнику\n\n" +
+                      "Для использования расширенного поиска обратитесь к администратору системы.", false);
+        });
+
+        // Обработчики событий
+        sendBtn.addEventListener('click', handleSendMessage);
+        
+        chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !sendBtn.disabled) {
+                handleSendMessage();
+            }
+        });
+
+        // Админ-панель: открытие/закрытие
+        adminOpenBtn.addEventListener('click', function() {
+            if (adminPanel.isAuthenticated) {
+                adminPanelElement.classList.add('open');
+                adminOverlay.classList.add('active');
+            } else {
+                adminLogin.classList.add('active');
+            }
+        });
+
+        adminCloseBtn.addEventListener('click', function() {
+            adminPanelElement.classList.remove('open');
+            adminOverlay.classList.remove('active');
+        });
+
+        adminOverlay.addEventListener('click', function() {
+            adminPanelElement.classList.remove('open');
+            adminOverlay.classList.remove('active');
+        });
+
+        // Аутентификация в админ-панели
+        loginButton.addEventListener('click', function() {
+            const password = adminPasswordInput.value;
+            
+            if (adminPanel.authenticate(password)) {
+                adminLogin.classList.remove('active');
+                adminPanelElement.classList.add('open');
+                adminOverlay.classList.add('active');
+                loginError.classList.remove('show');
+                adminPasswordInput.value = '';
+            } else {
+                loginError.classList.add('show');
+                adminPasswordInput.value = '';
+                adminPasswordInput.focus();
+            }
+        });
+
+        // Ввод пароля по нажатию Enter
+        adminPasswordInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                loginButton.click();
+            }
+        });
+
+        // Админ-панель: переключение вкладок
+        adminTabs.forEach(tab => {
+            tab.addEventListener('click', function() {
+                const tabName = this.getAttribute('data-tab');
+                
+                // Обновляем активную вкладку
+                adminTabs.forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+                
+                // Показываем соответствующее содержимое
+                document.querySelectorAll('.admin-tab-content').forEach(content => {
+                    content.classList.remove('active');
+                });
+                document.getElementById(`${tabName}-tab`).classList.add('active');
+            });
+        });
+
+        // Админ-панель: сохранение настроек
+        saveSettingsBtn.addEventListener('click', function() {
+            adminPanel.saveSettings();
+        });
+
+        // Админ-панель: экспорт данных
+        exportDataBtn.addEventListener('click', function() {
+            const dataType = document.getElementById('exportDataType').value;
+            const format = document.getElementById('exportFormat').value;
+            adminPanel.exportData(dataType, format);
+        });
+
+        // Админ-панель: очистка данных
+        clearDataBtn.addEventListener('click', function() {
+            const dataType = document.getElementById('clearDataType').value;
+            if (confirm(`Вы уверены, что хотите очистить данные типа "${dataType}"?`)) {
+                adminPanel.clearData(dataType);
+            }
+        });
+
+        // Фокус на поле ввода при загрузке
+        chatInput.focus();
+
+        // Информация о возможностях
+        setTimeout(() => {
+            addMessage("💡 **Расширенные методы поиска:**\n\n" +
+                      "• **Wikipedia** - энциклопедические данные\n" +
+                      "• **DuckDuckGo** - мгновенные ответы\n" +
+                      "• **Новости** - актуальные новости\n" +
+                      "• **Google** - веб-поиск\n" +
+                      "• **Академия** - научные публикации\n" +
+                      "• **YouTube** - видео материалы\n" +
+                      "• **Reddit** - обсуждения и мнения\n" +
+                      "• **GitHub** - код и репозитории\n" +
+                      "• **StackOverflow** - вопросы и ответы", false);
+        }, 2000);
+
+        setTimeout(() => {
+            addMessage("🔧 **Умный поиск:**\n\n" +
+                      "• Автоматическое определение типа запроса\n" +
+                      "• Кэширование результатов для скорости\n" +
+                      "• Резервные методы при ошибках\n" +
+                      "• Поддержка математических вычислений\n" +
+                      "• Поиск по множеству источников", false);
+        }, 5000);
+
+        console.log("✅ Расширенный поисковый ассистент запущен!");
+        console.log("✅ Админ-панель инициализирована!");
+        console.log("🔐 Пароль для админ-панели: admin123");
+    </script>
+</body>
+</html>
